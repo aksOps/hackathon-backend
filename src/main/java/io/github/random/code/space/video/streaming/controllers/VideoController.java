@@ -1,5 +1,8 @@
 package io.github.random.code.space.video.streaming.controllers;
 
+import io.github.random.code.space.video.streaming.Service.HistoryService;
+import io.github.random.code.space.video.streaming.model.UserHistory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -9,7 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -18,7 +23,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +35,9 @@ public class VideoController {
 
     @Value("${video.storage.location}")
     private Path videoStorageLocation;
+
+    @Autowired
+    private HistoryService historyService;
 
 
     @GetMapping("/video/{filename}")
@@ -89,14 +96,27 @@ public class VideoController {
     @GetMapping("/videos")
     public ResponseEntity<List<Map<String, String>>> listVideos() throws IOException {
         List<Map<String, String>> videoList = new ArrayList<>();
-
         Files.list(videoStorageLocation).filter(Files::isRegularFile).forEach(videoPath -> {
             String filename = videoPath.getFileName().toString();
             Map<String, String> videoInfo = new HashMap<>();
             videoInfo.put("filename", filename);
             videoList.add(videoInfo);
         });
-
         return ResponseEntity.ok(videoList);
+    }
+
+    @PostMapping("/video/history")
+    public void addHistory(@RequestHeader(value = "Authentication-Info") String username, @RequestParam("v") String filename) {
+        historyService.saveHistory(username, filename);
+    }
+
+    @GetMapping("/video/history")
+    public List<UserHistory> getHistory(@RequestHeader(value = "Authentication-Info") String username) {
+        return historyService.getHistory(username);
+    }
+
+    @GetMapping("/video/suggest")
+    public List<String> suggestHistory(@RequestHeader(value = "Authentication-Info") String username) {
+        return new ArrayList<>();
     }
 }
