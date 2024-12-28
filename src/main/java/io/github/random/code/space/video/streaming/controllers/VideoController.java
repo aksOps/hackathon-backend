@@ -121,7 +121,8 @@ public class VideoController {
     @GetMapping("/video/suggest")
     public ResponseEntity<List<Map<String, String>>> suggestHistory(@RequestHeader(value = "Authentication-Info") String username) {
         List<Map<String, String>> videoList = new ArrayList<>();
-        for (UserHistory userHistory : historyService.getHistory(username)) {
+        List<UserHistory> history = historyService.getHistory(username);
+        for (UserHistory userHistory : history) {
             videoCategorizer.compare(userHistory.getVideoName()).forEach(s -> {
                 Map<String, String> videoInfo = new HashMap<>();
                 videoInfo.put("filename", s);

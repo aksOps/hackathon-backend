@@ -39,7 +39,7 @@ public class VideoCategorizer {
     public Set<String> compare(String videoDescription) {
         videoDescription=videoDescription.replace(".mp4","");
         Set<String> suggestions=new HashSet<>();
-        EmbeddingSearchRequest embeddingSearchRequest=new EmbeddingSearchRequest(embeddingModel.embed(videoDescription).content(),10,0.9,null);
+        EmbeddingSearchRequest embeddingSearchRequest=new EmbeddingSearchRequest(embeddingModel.embed(videoDescription).content(),10,0.87,null);
         embeddingStore.search(embeddingSearchRequest).matches().forEach(textSegmentEmbeddingMatch -> {
             var embedded=textSegmentEmbeddingMatch.embeddingId();
             var videoName=store.get(embedded);
