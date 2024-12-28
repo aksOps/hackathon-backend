@@ -45,5 +45,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(AuthType.SIGNUP_FAILED);
         }
     }
-
 }
