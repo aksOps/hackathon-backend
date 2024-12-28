@@ -1,7 +1,9 @@
 package io.github.random.code.space.video.streaming.controllers;
 
 import io.github.random.code.space.video.streaming.Service.HistoryService;
+import io.github.random.code.space.video.streaming.Service.VideoCategorizer;
 import io.github.random.code.space.video.streaming.model.UserHistory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -31,14 +33,15 @@ import java.util.concurrent.atomic.LongAdder;
 
 
 @RestController
+@Log4j2
 public class VideoController {
 
+    @Autowired
+    VideoCategorizer videoCategorizer;
     @Value("${video.storage.location}")
     private Path videoStorageLocation;
-
     @Autowired
     private HistoryService historyService;
-
 
     @GetMapping("/video/{filename}")
     public ResponseEntity<StreamingResponseBody> streamVideo(@PathVariable String filename, @RequestHeader(value = "Range", required = false) String range) throws IOException {
@@ -116,7 +119,15 @@ public class VideoController {
     }
 
     @GetMapping("/video/suggest")
-    public List<String> suggestHistory(@RequestHeader(value = "Authentication-Info") String username) {
-        return new ArrayList<>();
+    public ResponseEntity<List<Map<String, String>>> suggestHistory(@RequestHeader(value = "Authentication-Info") String username) {
+        List<Map<String, String>> videoList = new ArrayList<>();
+        for (UserHistory userHistory : historyService.getHistory(username)) {
+            videoCategorizer.compare(userHistory.getVideoName()).forEach(s -> {
+                Map<String, String> videoInfo = new HashMap<>();
+                videoInfo.put("filename", s);
+                videoList.add(videoInfo);
+            });
+        }
+        return ResponseEntity.ok(videoList);
     }
 }

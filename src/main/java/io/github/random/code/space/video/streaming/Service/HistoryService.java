@@ -1,5 +1,6 @@
 package io.github.random.code.space.video.streaming.Service;
 
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import io.github.random.code.space.video.streaming.model.UserHistory;
 import io.github.random.code.space.video.streaming.repository.UserHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,10 @@ public class HistoryService {
 
     @Autowired
     private UserHistoryRepository userHistoryRepository;
+
+    @Autowired
+    VideoCategorizer videoCategorizer;
+
 
     public void saveHistory(String username, String videoName) {
         userHistoryRepository.save(UserHistory.builder().username(username).videoName(videoName).build());
